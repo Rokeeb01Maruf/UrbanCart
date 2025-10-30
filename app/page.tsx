@@ -1,103 +1,158 @@
-import Image from "next/image";
-
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+"use client"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { Filter } from "lucide-react"
+import React, { useEffect, useState } from "react"
+import Head from "@/component/main"
+import Search from "@/component/search"
+export default function Page(){
+  type value = {
+    id: number
+    title: string,
+    thumbnail: string,
+    price: number
+  }
+  const [query, setQuery] = useState("")
+  const [anothers, setAnother] = useState<value[]>([])
+  const [data, setData] = useState([])
+  const [fsearch, setFsearch] = useState<value[]>([])
+  const [other, setOther] = useState<value[]>([])
+  const [topSales, setSales] = useState<value[]>([])
+  const [collections, setCollections] = useState<value[]>([])
+  const router = useRouter()
+  const [img, setImg] = useState(["/images/holder1.jpg","/images/holder2.jpg","/images/holder3.jpg"])
+  const handleClick =()=>{
+    router.push("/category")
+  }
+  const getProducts = async () => {
+    await fetch('./api/logic?action=getProduct',{method: "GET"})
+    .then(res=>res.json())
+    .then(data=>{
+      setData(data.newFile)})
+  }
+  useEffect(()=>{
+    getProducts()
+  },[])
+  useEffect(()=>{
+    let beauty: value[]; let fragrances: value[]; let furniture: value[]; let groceries: value[]; let laptops: value[];
+    let motorcycle: value[]; let women: value[]; let smartphones: value[]; let skincare: value[]; let tops: value[]; 
+    if(data){
+      beauty = data.filter((e:{category: string})=>e.category?.includes("beauty"))
+      fragrances = data.filter((e:{category: string})=>e.category?.includes("fragrances"))
+      furniture = data.filter((e:{category: string})=>e.category?.includes("furniture"))
+      groceries = data.filter((e:{category: string})=>e.category?.includes("groceries"))
+      laptops = data.filter((e:{category: string})=>e.category?.includes("laptops"))      
+      motorcycle = data.filter((e:{category: string})=>e.category?.includes("motorcycle"))      
+      women = data.filter((e:{category: string})=>e.category?.includes("womens-bags"))      
+      smartphones = data.filter((e:{category: string})=>e.category?.includes("smartphones"))      
+      skincare = data.filter((e:{category: string})=>e.category?.includes("vehicle"))      
+      tops = data.filter((e:{category: string})=>e.category?.includes("tops"))      
+      const frequent = [beauty[0], fragrances[0], furniture[0], groceries[0], laptops[0]]
+      const top = [beauty[1], fragrances[1], furniture[1], groceries[1], laptops[1]]
+      const collections = [beauty[2], fragrances[2], furniture[2], groceries[2], laptops[2]]
+      const others: value[] = []
+      for(let i = 0; i<4; i++){
+        others.push(motorcycle[i],women[i], smartphones[i], skincare[i], tops[i])
+      }
+      let another: value[] = []
+      for (let i = 150; i<180; i++){
+        another.push(data[i])
+      }
+      setAnother(another)
+      setCollections(collections)
+      setFsearch(frequent)
+      setSales(top)
+      setOther(others)
+    }
+  },[data])
+  return(
+    <div>
+      <Head img = {img} handleClick={()=>handleClick()}/>
+      <Search onData={setQuery}/>
+      <main className="px-25">
+        <header className="flex gap-x-4 mb-8">
+          <Link href={'/category'} className="font-montserrat cursor-pointer gap-x-1 flex items-center">Categories <Filter width={14}/> </Link>
+          <div className="flex gap-x-5">
+            <Link href="/category/beauty" className="font-roboto cursor-pointer">Beauty</Link>
+            <Link href="/category/fragrances" className="font-roboto cursor-pointer">Fragrances</Link>
+            <Link href="/category/furniture" className="font-roboto cursor-pointer">Furniture</Link>
+            <Link href="/category/groceries" className="font-roboto cursor-pointer">Groceries</Link>
+            <Link href="/homedecoration" className="font-roboto cursor-pointer">Home decoration</Link>
+            <Link href="/category/laptops" className="font-roboto cursor-pointer">Laptops</Link>
+            <Link href="/category/mens" className="font-roboto cursor-pointer">Mens Wear</Link>
+            <Link href="/category/sunglasses" className="font-roboto cursor-pointer">Sunglasses</Link>
+            <Link href="/category/motorcycle" className="font-roboto cursor-pointer">Motorcycle</Link>
+            <Link href="/category/vehicle" className="font-roboto cursor-pointer">Vehicle</Link>
+            <Link href="/category/womens" className="font-roboto cursor-pointer">Womens wear</Link>
+          </div>
+        </header>
+        <main>
+          <aside className="bg-orange-200 rounded-sm px-10 py-3 mb-1">
+            <h2 className="mb-2 font-montserrat font-bold text-black text-lg">NEW COLLECTIONS</h2>
+            <main className="grid grid-cols-5 justify-between">
+              {collections.map((e,index)=>(
+                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                  <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
+                  <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
+                  <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
+                </Link>
+              ))
+              }
+            </main>
+          </aside>
+          <aside className="bg-orange-200 rounded-sm px-10 py-3 mb-1">
+            <h2 className="mb-2 font-montserrat font-bold text-black text-lg">TOP SALES</h2>
+            <main className="grid grid-cols-5 justify-between">
+              {topSales.map((e,index)=>(
+                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                  <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
+                  <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
+                  <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
+                </Link>
+              ))
+              }
+            </main>
+          </aside>
+          <aside className="bg-orange-200 rounded-sm px-10 py-3 mb-1">
+            <h2 className="mb-2 font-montserrat font-bold text-black text-lg">FREQUENTLY SEARCHED</h2>
+            <main className="grid grid-cols-5 justify-between">
+              {fsearch.map((e,index)=>(
+                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                  <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
+                  <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
+                  <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
+                </Link>
+              ))
+              }
+            </main>
+          </aside>
+          <aside className="bg-orange-200 rounded-sm px-10 py-3 mb-1">
+            <h2 className="mb-2 font-montserrat font-bold text-black text-lg">MORE</h2>
+            <main className="grid grid-cols-5 justify-between">
+              {other.map((e,index)=>(
+                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                  <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
+                  <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
+                  <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
+                </Link>
+              ))
+              }
+            </main>
+          </aside>
+          <aside className="bg-orange-200 rounded-sm px-10 py-3 mb-1">
+            <main className="grid grid-cols-5 justify-between">
+              {anothers.map((e, index)=>(
+                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                  <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
+                  <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
+                  <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
+                </Link>
+              ))
+              }
+            </main>
+          </aside>
+        </main>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
-  );
+  )
 }
