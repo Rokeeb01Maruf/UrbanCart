@@ -39,7 +39,7 @@ export default function Category(){
         <div className="mt-25">
             <Search onData={setQuery}/>
             <header className="flex gap-x-4 mb-8 mx-25">
-                <p className="font-montserrat gap-x-1 flex items-center">Categories <Filter width={14}/> </p>
+                <button onClick={()=>router.push("../category")} className="cursor-pointer font-montserrat gap-x-1 flex items-center">Categories <Filter width={14}/> </button>
                 <div className="flex relative gap-x-5">
                     <button onClick={()=>router.push("./beauty")} className="font-roboto cursor-pointer">Beauty</button>
                     <button onClick={()=>router.push("./fragrances")} className="font-roboto cursor-pointer">Fragrances</button>
@@ -59,7 +59,7 @@ export default function Category(){
                 <h2 className="mb-2 font-montserrat font-bold text-black text-lg">{id?.toString().toLocaleUpperCase()}</h2>
                 <main className="grid grid-cols-5 justify-between">
                 {data && data.map((e,index)=>(
-                    <Link href={`../${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                    <Link href={`../products/${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
                         <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
                         <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
                         <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>

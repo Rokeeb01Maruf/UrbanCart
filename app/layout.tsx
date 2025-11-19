@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css"
+import Script from "next/script";
 import Header from "@/component/header";
 import { CartProvider } from "@/component/CartProvider";
 
@@ -15,6 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+          <Script src="https://js.paystack.co/v1/inline.js" strategy="beforeInteractive"/>
+      </head>
       <body className="antialiased bg-secondary">
         <CartProvider>
           <Header />

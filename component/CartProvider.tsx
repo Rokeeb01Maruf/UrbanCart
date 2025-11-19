@@ -7,6 +7,7 @@ type contentType = {
     increaseCart: (data: {title: string})=>void,
     decreaseCart: (data: {title: string})=>void,
     removeItem: (data: {title: string})=> void,
+    emptyCart: ()=> void,
     balance: number
 }
 export const CartContext = createContext<contentType | undefined>(undefined)
@@ -27,22 +28,30 @@ export const CartProvider = ({children} : Readonly<{children: React.ReactNode}>)
     }
     const increaseCart = (data :{title: string}) =>{
         const newData :any= cartDetails.find((e)=> e.title === data.title)
-        newData.count = newData.count + 1
-        const upDateCart :any= cartDetails.map(e=> e.title == newData?.title ? newData : e)
-        setCartDetails(upDateCart)
+        if(newData){
+            newData.count = newData.count + 1
+            const upDateCart :any= cartDetails.map(e=> e.title == newData?.title ? newData : e)
+            setCartDetails(upDateCart)
+        }
     }
     const decreaseCart = (data :{title: string}) =>{
         const newData :any = cartDetails.find((e)=> e.title === data.title)
-        if(newData.count > 1){
-            newData.count = newData.count - 1
-            const upDateCart :any= cartDetails.map(e=> e.title == newData?.title ? newData : e)
-            setCartDetails(upDateCart)
+        if(newData){
+            if(newData.count > 1){
+                newData.count = newData.count - 1
+                const upDateCart :any= cartDetails.map(e=> e.title == newData?.title ? newData : e)
+                setCartDetails(upDateCart)
+            }
         }
     }
     const removeItem = (data: {title: string}) => {
         const removeData :any = cartDetails.filter((e)=> e.title !== data.title)
         setCartDetails(removeData)
         setCart(removeData.length)
+    }
+    const emptyCart = () => {
+        setCartDetails([])
+        setCart(0)
     }
     useEffect(()=>{
         if(cartDetails.length != 0){
@@ -55,7 +64,7 @@ export const CartProvider = ({children} : Readonly<{children: React.ReactNode}>)
         }
     },[cartDetails])
     return(
-        <CartContext.Provider value={{cart, cartDetails, cartFunction, decreaseCart, increaseCart, removeItem, balance}}>
+        <CartContext.Provider value={{cart, cartDetails, cartFunction, decreaseCart, increaseCart, removeItem, balance, emptyCart}}>
             {children}
         </CartContext.Provider>
     )

@@ -12,7 +12,7 @@ type mine = {id: string, title: string, description: string, category: string, p
     thumbnail: string}
 
 export default function(){
-    const { cartFunction, increaseCart, decreaseCart} = useContext(CartContext)
+    const { cartFunction, increaseCart, decreaseCart} = useContext<any>(CartContext)
     const [count, setCount] = useState(1)
     const {id} = useParams()
     const [color, setColor] = useState(["white","white","white","white","white"])
@@ -72,7 +72,7 @@ export default function(){
                 </nav>
                 <main className="grid grid-cols-3 mt-5 bg-orange-50 gap-x-5">
                     <header className="max-w-90">
-                        <img src={data?.images[0]} alt="" className="rounded-sm h-90 w-90 bg-gradient-to-br from-orange-400 to-white"/>
+                        <img src={data?.images[0]} alt="" className="rounded-sm h-90 w-90 bg-linear-to-br from-orange-400 to-white"/>
                     </header>
                     <main>
                         <p className="font-roboto text-gray-500 font-bold mt-4">{data?.brand}</p>

@@ -24,7 +24,7 @@ export default function Page(){
         await fetch('./api/logic?action=getProduct',{method: "GET"})
         .then(res=>res.json())
         .then(data=>{
-          setData(data.newFile)})
+          setData(data)})
       }
       useEffect(()=>{
         getProducts()
@@ -34,7 +34,7 @@ export default function Page(){
             <Search onData={setQuery}/>
             <header className="flex gap-x-4 mb-8 mx-25">
                 <p className="font-montserrat gap-x-1 flex items-center">Categories <Filter width={14}/> </p>
-                <div className="flex relative gap-x-5">
+                <div className="flex relative w-full justify-between">
                     <button onClick={()=>router.push("./category/beauty")} className="font-roboto cursor-pointer">Beauty</button>
                     <button onClick={()=>router.push("./category/fragrances")} className="font-roboto cursor-pointer">Fragrances</button>
                     <button onClick={()=>router.push("./category/furniture")} className="font-roboto cursor-pointer">Furniture</button>
@@ -56,7 +56,7 @@ export default function Page(){
                         <main className="grid grid-cols-5 justify-between">
                             {
                                 data && data.map((e,index)=>(e.category == cat && (
-                                    <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                                    <Link href={`./products/${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
                                         <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
                                         <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
                                         <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>

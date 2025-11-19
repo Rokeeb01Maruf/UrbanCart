@@ -27,8 +27,13 @@ export default function Page(){
   const getProducts = async () => {
     await fetch('./api/logic?action=getProduct',{method: "GET"})
     .then(res=>res.json())
-    .then(data=>{
-      setData(data.newFile)})
+    .then(datum=>{
+      if(datum.error){
+        console.log(datum.error)
+      }else{
+        setData(datum)
+      }
+    })
   }
   useEffect(()=>{
     getProducts()
@@ -72,7 +77,7 @@ export default function Page(){
       <main className="px-25">
         <header className="flex gap-x-4 mb-8">
           <Link href={'/category'} className="font-montserrat cursor-pointer gap-x-1 flex items-center">Categories <Filter width={14}/> </Link>
-          <div className="flex gap-x-5">
+          <div className="flex justify-between w-full">
             <Link href="/category/beauty" className="font-roboto cursor-pointer">Beauty</Link>
             <Link href="/category/fragrances" className="font-roboto cursor-pointer">Fragrances</Link>
             <Link href="/category/furniture" className="font-roboto cursor-pointer">Furniture</Link>
@@ -91,7 +96,7 @@ export default function Page(){
             <h2 className="mb-2 font-montserrat font-bold text-black text-lg">NEW COLLECTIONS</h2>
             <main className="grid grid-cols-5 justify-between">
               {collections.map((e,index)=>(
-                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                <Link href={`./products/${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
                   <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
                   <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
                   <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
@@ -104,7 +109,7 @@ export default function Page(){
             <h2 className="mb-2 font-montserrat font-bold text-black text-lg">TOP SALES</h2>
             <main className="grid grid-cols-5 justify-between">
               {topSales.map((e,index)=>(
-                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                <Link href={`./products/${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
                   <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
                   <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
                   <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
@@ -117,7 +122,7 @@ export default function Page(){
             <h2 className="mb-2 font-montserrat font-bold text-black text-lg">FREQUENTLY SEARCHED</h2>
             <main className="grid grid-cols-5 justify-between">
               {fsearch.map((e,index)=>(
-                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                <Link href={`./products/${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
                   <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
                   <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
                   <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
@@ -130,7 +135,7 @@ export default function Page(){
             <h2 className="mb-2 font-montserrat font-bold text-black text-lg">MORE</h2>
             <main className="grid grid-cols-5 justify-between">
               {other.map((e,index)=>(
-                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                <Link href={`./products/${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
                   <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
                   <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
                   <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
@@ -142,7 +147,7 @@ export default function Page(){
           <aside className="bg-orange-200 rounded-sm px-10 py-3 mb-1">
             <main className="grid grid-cols-5 justify-between">
               {anothers.map((e, index)=>(
-                <Link href={`./${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
+                <Link href={`./products/${e?.title.split(" ").join("")}`} key={index} className="max-w-50 cursor-pointer">
                   <img src={e?.thumbnail} alt="" className="bg-gray-300 w-50 h-50"/>
                   <p className="font-roboto text-sm mt-2 text-center truncate">{e?.title}</p>
                   <p className="text-center font-montserrat font-bold">&#8358; {(e?.price * 1000).toLocaleString()}</p>
