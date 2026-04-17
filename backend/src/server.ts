@@ -1,17 +1,17 @@
 import express from "express"
 import cors from "cors"
 import authRouter from "./routes/Auth/routes.js"
-import { pool } from "./config/db.js"
+import dotenv from "dotenv"
 
 const app = express()
 const PORT = 5000
+dotenv.config()
 
 app.use(cors())
 app.use(express.json())
 app.use("/auth",authRouter)
 
 app.get('/', (req, res)=>{
-    const me = req.method
     res.status(200).send("Server is running")
 })
 
