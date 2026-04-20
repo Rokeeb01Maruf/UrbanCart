@@ -1,11 +1,9 @@
 import express from "express"
 import cors from "cors"
 import authRouter from "./routes/Auth/routes.js"
-import dotenv from "dotenv"
 
 const app = express()
 const PORT = 5000
-dotenv.config()
 
 app.use(cors())
 app.use(express.json())
