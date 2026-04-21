@@ -2,7 +2,7 @@ export default function Page(){
   return(
     <>
     <div>
-      <p>Hello World!</p>
+      <p className="">Hello World!</p>
     </div>
     </>
   )
