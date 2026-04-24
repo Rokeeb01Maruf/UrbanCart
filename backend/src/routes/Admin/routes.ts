@@ -7,7 +7,7 @@ const router = Router()
 router.post("/verify-vendors", async (req, res)=>{
     const header = req.headers
     if(!header){
-        return res.status(400).json({message: "Unauthorized request"})
+        return res.status(403).json({message: "Unauthorized request"})
     }
     const bearerToken = header.authorization as string
     const bearer = bearerToken.split(" ")[1]
@@ -19,13 +19,13 @@ router.post("/verify-vendors", async (req, res)=>{
         select role from auth where id = $1
         `, [token])
     if(verifyId.rows.length < 1){
-        return res.status(401).json({message: "Unauthorized request"})
+        return res.status(403).json({message: "Unauthorized request"})
     }
     if(verifyId.rows[0].role !== "admin"){
-        return res.status(401).json({message: "Unauthorized access"})
+        return res.status(403).json({message: "Unauthorized access"})
     }
     const verifyVendors = await pool.query(`
-        select * from vendor where verification_status = 'pending'`)
+        select * from vendors_request where verification_status = 'pending'`)
     if(verifyVendors.rows.length < 1){
         return res.status(200).json({message: "no unverified vendor"})
     }else{
@@ -35,7 +35,7 @@ router.post("/verify-vendors", async (req, res)=>{
     }
 })
 
-router.patch("/approve", async (req, res)=>{
+router.patch("/approve:id", async (req, res)=>{
     const header = req.headers
     if(!header) return res.status(400).json({message: "invalid credentials"})
     const bearerToken = header.authorization
@@ -46,19 +46,18 @@ router.patch("/approve", async (req, res)=>{
     const validateId = await pool.query(`
         select role from auth where id = $1 and role = 'admin'
         `,[id])
-    if(validateId.rows.length < 1) return res.status(200).json({message: "Unauthorized request"})
-    const body = req.body
-    if(!body) return res.status(401).json({message: "invalid credential"})
-    const vId = body.id
+    if(validateId.rows.length < 1) return res.status(403).json({message: "Unauthorized request"})
+    const vId = req.params.id as string
+    if(!vId) return res.status(400).json({message: "Forbidden request"})
     const approve = await pool.query(`
-        update vendor set verification_status = 'verified' where id = $1
+        update vendors_request set verification_status = 'verified' where id = $1
         returning *
         `, [vId])
-    if(approve.rows.length < 1 || !approve.rows) return res.status(200).json({message: "Make vending request"})
+    if(approve.rows.length < 1 || !approve.rows) return res.status(400).json({message: "Make vending request"})
     const validateVendor = await pool.query(`
         update auth set role = 'vendor' where id = $1
         `, [approve.rows[0].user_id])
-    if(approve.rows.length < 1) return res.json({message: 'server error'})
+    if(validateVendor.rows.length < 1) return res.json({message: 'server error'})
     return res.status(200).json([{message: `${approve.rows[0].business_name} has been approved`},
  approve.rows[0]])
 })
