@@ -1,10 +1,10 @@
 import Router from "express";
-import { pool } from "../../config/db.js";
-import { verifyToken } from "../../utils/generateToken.js";
+import { pool } from "../../../config/db.js";
+import { verifyToken } from "../../../utils/generateToken.js";
 
 const router = Router()
 
-router.post("/verify-vendors", async (req, res)=>{
+router.post("/vendors-request", async (req, res)=>{
     const header = req.headers
     if(!header){
         return res.status(403).json({message: "Unauthorized request"})
@@ -35,7 +35,7 @@ router.post("/verify-vendors", async (req, res)=>{
     }
 })
 
-router.patch("/approve:id", async (req, res)=>{
+router.patch("/approve/:id", async (req, res)=>{
     const header = req.headers
     if(!header) return res.status(400).json({message: "invalid credentials"})
     const bearerToken = header.authorization
@@ -48,7 +48,7 @@ router.patch("/approve:id", async (req, res)=>{
         `,[id])
     if(validateId.rows.length < 1) return res.status(403).json({message: "Unauthorized request"})
     const vId = req.params.id as string
-    if(!vId) return res.status(400).json({message: "Forbidden request"})
+    if(!vId) return res.status(403).json({message: "Forbidden request"})
     const approve = await pool.query(`
         update vendors_request set verification_status = 'verified' where id = $1
         returning *
@@ -56,10 +56,17 @@ router.patch("/approve:id", async (req, res)=>{
     if(approve.rows.length < 1 || !approve.rows) return res.status(400).json({message: "Make vending request"})
     const validateVendor = await pool.query(`
         update auth set role = 'vendor' where id = $1
-        `, [approve.rows[0].user_id])
+        returning *
+        `, [approve.rows[0].userid])
     if(validateVendor.rows.length < 1) return res.json({message: 'server error'})
-    return res.status(200).json([{message: `${approve.rows[0].business_name} has been approved`},
- approve.rows[0]])
+        const registerBusiness = await pool.query(`
+            insert into vendor (userid, name, profile_url, address, details, verification_status)
+            values ($1, $2, $3, $4, $5, $6) returning *
+            `, [approve.rows[0].userid, approve.rows[0].name, approve.rows[0].profile_url, 
+        approve.rows[0].address, approve.rows[0].details, approve.rows[0].verification_status])
+        if(registerBusiness.rows.length < 1) return res.status(500).json({message: "Server error, failed to register vendor"})
+    return res.status(200).json([{message: `${registerBusiness.rows[0].name} has been approved`},
+ registerBusiness.rows[0]])
 })
 
 export default router

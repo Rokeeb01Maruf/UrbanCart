@@ -1,6 +1,6 @@
 import Router from "express";
-import { verifyToken } from "../../utils/generateToken.js";
-import { pool } from "../../config/db.js";
+import { verifyToken } from "../../../utils/generateToken.js";
+import { pool } from "../../../config/db.js";
 
 const router = Router()
 router.post("/request", async (req, res)=>{
@@ -28,7 +28,7 @@ router.post("/request", async (req, res)=>{
         return res.status(403).json({message: "invalid credentials"})
     }
     const request = await pool.query(`
-        insert into vendors-request (userid, name, profile_url, address, details,verification_status)
+        insert into vendors_request (userid, name, profile_url, address, details,verification_status)
         values($1, $2, $3, $4, $5, $6)
         returning *
         `, [id, body.name, body.profileUrl, body.address, body.details, "pending"])

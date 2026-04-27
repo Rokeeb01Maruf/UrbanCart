@@ -1,8 +1,8 @@
 import express from "express"
 import cors from "cors"
 import authRouter from "./routes/Auth/routes.js"
-import vendorsRouter from "./routes/vendors/routes.js"
-import verifyVendors from "./routes/Admin/routes.js"
+import vendorsRouter from "./routes/vendors/authorization/routes.js"
+import verifyVendors from "./routes/Admin/vendors/routes.js"
 
 const app = express()
 const PORT = 5000
