@@ -48,13 +48,15 @@ router.post("/my-products", async (req, res)=>{
     return res.status(200).json([{message: "Product listed successfully"}, products.rows])
 })
 
-router.patch("/pause/:id", async (req, res)=>{
+router.patch("/alter/:id", async (req, res)=>{
     const header = req.headers
+    const action = req.query.action as string
     if(!header) res.status(400).json({message: "Bad request"})
-    const bearerToken = header.authorization as string
+        const bearerToken = header.authorization as string
     if(!bearerToken) return res.status(400).json({message: "Bad request"})
-    const token = bearerToken.split(" ")[1] as string
+        const token = bearerToken.split(" ")[1] as string
     if(!token) res.status(400).json({message: "Bad request"})
+    if(!action) res.status(400).json({message: "Bad request"})
     const id = verifyToken(token).id
     const productId = req.params.id as string
     if(!productId) return res.status(400).json({message: "Bad Request"})
@@ -62,10 +64,30 @@ router.patch("/pause/:id", async (req, res)=>{
         select id from vendor where userid = $1
         `, [id])
     if(vendor_id.rows.length < 1) return res.status(403).json({message: "Not  a vendor"})
-    const pause = await pool.query(`
-        update products set report_status = 'pending' where vendor_id = $1 and id = $2 returning *
-        `, [vendor_id.rows[0].id, productId])
-    return res.status(200).json([{message: "Paused successfully"}, pause.rows])
+    if(action === "activate"){
+        const activate = await pool.query(`
+            update products set report_status = 'activate' where id = $1 and vendor_id = $2
+            returning *
+            `, [productId, vendor_id.rows[0].id])
+        if(activate.rows.length < 1) return res.status(500).json({message: "sever error"})
+        return res.status(200).json([{message: "Activation request sent successfully"}, activate.rows[0]])
+    }else if(action === "nullify"){
+        const nullify = await pool.query(`
+            update products set report_status = 'nullify' where id = $1 and vendor_id = $2
+            returning *
+            `, [productId, vendor_id.rows[0].id])
+        if(nullify.rows.length < 1) return res.status(500).json({message: "server error"})
+        return res.status(200).json([{message: "Delete request sent successfully"}, nullify.rows[0]])
+    }else if(action === "pause"){
+        const pause = await pool.query(`
+            update products set report_status = 'pending' where id = $1 and vendor_id = $2
+            returning *
+            `,[productId, vendor_id.rows[0].id])
+        if(pause.rows.length < 1) return res.status(500).json({message: "server error"})
+        return res.status(200).json([{message: "pause request sent"}, pause.rows[0]])
+    }else{
+        return res.status(400).json({message: "invalid request"})
+    }
     
 })
 

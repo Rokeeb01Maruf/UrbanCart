@@ -4,6 +4,7 @@ import authRouter from "./routes/Auth/routes.js"
 import vendorsRouter from "./routes/vendors/authorization/routes.js"
 import verifyVendors from "./routes/Admin/vendors/routes.js"
 import products from "./routes/vendors/products/routes.js"
+import productAlter from "./routes/Admin/products/routes.js"
 
 const app = express()
 const PORT = 5000
@@ -14,6 +15,7 @@ app.use("/auth",authRouter)
 app.use("/vendor", vendorsRouter)
 app.use("/admin", verifyVendors)
 app.use("/products", products)
+app.use("/admin/products", productAlter)
 
 app.get('/', (req, res)=>{
     res.status(200).send("Server is running")
