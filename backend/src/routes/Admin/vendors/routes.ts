@@ -69,4 +69,30 @@ router.patch("/approve/:id", async (req, res)=>{
  registerBusiness.rows[0]])
 })
 
+router.post("/vendors", async (req, res)=>{
+    const header = req.headers
+    if(!header){
+        return res.status(403).json({message: "Unauthorized request"})
+    }
+    const bearerToken = header.authorization as string
+    const bearer = bearerToken.split(" ")[1]
+    if(!bearer){
+        return res.status(400).json({message: "Unauthorized request"})
+    }
+    const token = verifyToken(bearer).id as string
+    const verifyId = await pool.query(`
+        select role from auth where id = $1
+        `, [token])
+    if(verifyId.rows.length < 1){
+        return res.status(403).json({message: "Unauthorized request"})
+    }
+    if(verifyId.rows[0].role !== "admin"){
+        return res.status(403).json({message: "Unauthorized access"})
+    }
+    const getVendors = await pool.query(`select * from vendor`)
+    if (getVendors.rows.length === 0) return res.status(200).json({message: "Empty vendors list"})
+    return res.status(200).json([{message: "vendor's list fetched successfully"}, getVendors.rows])
+})
+
+router.post("/vendors/:id")
 export default router

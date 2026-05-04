@@ -66,21 +66,21 @@ router.patch("/alter/:id", async (req, res)=>{
     if(vendor_id.rows.length < 1) return res.status(403).json({message: "Not  a vendor"})
     if(action === "activate"){
         const activate = await pool.query(`
-            update products set report_status = 'activate' where id = $1 and vendor_id = $2
+            update products set report_status = 'activate', status = 'pending' where id = $1 and vendor_id = $2
             returning *
             `, [productId, vendor_id.rows[0].id])
         if(activate.rows.length < 1) return res.status(500).json({message: "sever error"})
         return res.status(200).json([{message: "Activation request sent successfully"}, activate.rows[0]])
     }else if(action === "nullify"){
         const nullify = await pool.query(`
-            update products set report_status = 'nullify' where id = $1 and vendor_id = $2
+            update products set report_status = 'nullify', status = 'pending' where id = $1 and vendor_id = $2
             returning *
             `, [productId, vendor_id.rows[0].id])
         if(nullify.rows.length < 1) return res.status(500).json({message: "server error"})
         return res.status(200).json([{message: "Delete request sent successfully"}, nullify.rows[0]])
     }else if(action === "pause"){
         const pause = await pool.query(`
-            update products set report_status = 'pending' where id = $1 and vendor_id = $2
+            update products set report_status = 'pending', status = 'pending' where id = $1 and vendor_id = $2
             returning *
             `,[productId, vendor_id.rows[0].id])
         if(pause.rows.length < 1) return res.status(500).json({message: "server error"})

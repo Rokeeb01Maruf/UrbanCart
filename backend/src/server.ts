@@ -12,9 +12,9 @@ const PORT = 5000
 app.use(cors())
 app.use(express.json())
 app.use("/auth",authRouter)
-app.use("/vendor", vendorsRouter)
+app.use("/vendor/auth", vendorsRouter)
 app.use("/admin", verifyVendors)
-app.use("/products", products)
+app.use("/vendor/products", products)
 app.use("/admin/products", productAlter)
 
 app.get('/', (req, res)=>{

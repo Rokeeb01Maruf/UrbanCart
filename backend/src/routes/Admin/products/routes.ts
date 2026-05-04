@@ -4,7 +4,7 @@ import { pool } from "../../../config/db.js";
 
 const router = Router()
 
-router.post("/list", async(req, res)=>{
+router.post("/action", async(req, res)=>{
     const header = req.headers
     if(!header) return res.status(400).json({message: "Bad Request"})
     const bearerToken = header.authorization as string
@@ -12,9 +12,14 @@ router.post("/list", async(req, res)=>{
     const token = bearerToken.split(" ")[1]
     if(!token) return res.status(400).json({message: "Bad Request"})
     const id = verifyToken(token).id as string
+    if(!id) return res.status(400).json({message: "Bad Request"})
     const verify = await pool.query(`
-        select role from auth 
-        `)
+        select role from auth where id  = $1
+        `, [id])
+    if(verify.rows.length < 1 || verify.rows[0].role !== 'admin') return res.status(403).json({message: "Unauthorize Request"})
+    const getItems = await pool.query(`select * from products where status = 'pending'`)
+    if(getItems.rows.length < 1) return res.status(404).json({message: "No products found"})
+    return res.status(200).json(getItems.rows)
 })
 
 router.patch("/alter/:id", async (req, res)=>{
@@ -24,14 +29,14 @@ router.patch("/alter/:id", async (req, res)=>{
     if(!header) return res.status(400).json({message: "Bad Request"})
     const bearerToken = header.authorization as string
     if(!bearerToken) return res.status(400).json({message: "Bad request"})
-    const token = bearerToken.split(" ")[0] as string
+    const token = bearerToken.split(" ")[1] as string
     if(!token) return res.status(400).json({message: "Bad request"})
     const id = verifyToken(token).id as string
     const verify = await pool.query(`
         select role from auth where id = $1
         `, [id])
     if(verify.rows.length < 1) return res.status(403).json({message: "Unauthorized request"})
-    if(verify.rows[0].id !== "admin") return res.status(403).json({message: "Unauthorized request"})
+    if(verify.rows[0].role !== "admin") return res.status(403).json({message: "Unauthorized request"})
     const action = req.query.action
     if(action === "approve"){
         const approve = await pool.query(`

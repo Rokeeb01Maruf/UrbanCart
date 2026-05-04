@@ -117,14 +117,15 @@ router.post("/signin", async (req, res) => {
 router.get("/me", async (req, res) => {
     const token = req.headers
     if (!token.authorization) {
-        return res.status(403).json({ message: "Authorization is required" })
+        return res.status(400).json({ message: "Authorization is required" })
     } else {
         const tokenStr = token.authorization as string
         const tokenId = tokenStr.split(" ")[1]
         if (!tokenId) {
-            return res.status(401).json({ message: "unauthorized access" })
+            return res.status(400).json({ message: "unauthorized access" })
         }
         const tokenVerify = verifyToken(tokenId)
+        if(!tokenVerify) return res.status(403).json({message: "Unauthorized request"})
         const checkToken = await pool.query(
             `
             select * from auth where id = $1
