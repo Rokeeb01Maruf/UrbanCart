@@ -93,6 +93,4 @@ router.post("/vendors", async (req, res)=>{
     if (getVendors.rows.length === 0) return res.status(200).json({message: "Empty vendors list"})
     return res.status(200).json([{message: "vendor's list fetched successfully"}, getVendors.rows])
 })
-
-router.post("/vendors/:id")
 export default router

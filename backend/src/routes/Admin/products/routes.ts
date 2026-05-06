@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { verifyToken } from "../../../utils/generateToken.js";
 import { pool } from "../../../config/db.js";
+import { verifyadmin } from "../../../utils/verify.js";
 
 const router = Router()
 
@@ -65,4 +66,8 @@ router.patch("/alter/:id", async (req, res)=>{
 
 })
 
+router.get("/get", (req, res)=>{
+    const header :any= req.header
+    const responses = verifyadmin(header)
+})
 export default router
