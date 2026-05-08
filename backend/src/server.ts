@@ -13,7 +13,7 @@ app.use(cors())
 app.use(express.json())
 app.use("/auth",authRouter)
 app.use("/vendor/auth", vendorsRouter)
-app.use("/admin", verifyVendors)
+app.use("/admin/vendors", verifyVendors)
 app.use("/vendor/products", products)
 app.use("/admin/products", productAlter)
 
