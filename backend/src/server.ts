@@ -1,10 +1,12 @@
 import express from "express"
 import cors from "cors"
 import authRouter from "./routes/Auth/routes.js"
+import agentsSetup from "./routes/Agents/setup/routes.js"
 import vendorsRouter from "./routes/vendors/authorization/routes.js"
 import verifyVendors from "./routes/Admin/vendors/routes.js"
 import products from "./routes/vendors/products/routes.js"
 import productAlter from "./routes/Admin/products/routes.js"
+import verifyAgent from "./routes/Admin/agent/routes.js"
 
 const app = express()
 const PORT = 5000
@@ -16,7 +18,8 @@ app.use("/vendor/auth", vendorsRouter)
 app.use("/admin/vendors", verifyVendors)
 app.use("/vendor/products", products)
 app.use("/admin/products", productAlter)
-
+app.use("/agent/delivery-agent", agentsSetup)
+app.use("/admin/agents", verifyAgent)
 app.get('/', (req, res)=>{
     res.status(200).send("Server is running")
 })

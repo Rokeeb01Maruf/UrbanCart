@@ -4,7 +4,7 @@ import { verifyadmin } from "../../../utils/verify.js";
 
 const router = Router()
 
-router.post("/request", async (req, res)=>{
+router.post("/requests", async (req, res)=>{
     const verify = await verifyadmin(req)
     if(verify.code != 200) return res.status(verify.code).json({error: verify.error})
     const verifyVendors = await pool.query(`
@@ -64,7 +64,7 @@ router.patch("/action/:id", async (req, res)=>{
                 registerBusiness.rows[0]])
         }else if(action === "reject"){
             const reject = await pool.query(`
-                update vendors_request set verification_status = 'rejected' where id = $1
+                update vendors_request set verification_status = 'rejected', status = 'suspended' where id = $1
                 returning *
              `, [vId])
              if(reject.rows.length < 1) return res.status(500).json({message: "Server error, failed to reject vendor"})
@@ -77,11 +77,31 @@ router.patch("/action/:id", async (req, res)=>{
     }
 })
 
-router.post("/vendors", async (req, res)=>{
+router.post("/registered", async (req, res)=>{
     const verify = await verifyadmin(req)
     if(verify.code != 200) return res.status(verify.code).json({error: verify.error})
-    const getVendors = await pool.query(`select * from vendor`)
+    const getVendors = await pool.query(`select * from vendors`)
     if (getVendors.rows.length === 0) return res.status(404).json({message: "No vendors found"})
     return res.status(200).json([{message: "vendor's list fetched successfully"}, getVendors.rows])
+})
+
+router.patch("/status/:id", async (req, res)=>{
+    const verify = await verifyadmin(req)
+    if(verify.code != 200) return res.status(verify.code).json({error: verify.error})
+    const vId = req.params.id as string
+    if(!vId) return res.status(400).json({message: "Bad request"})
+    const status = req.query.action as string
+    if(status == 'suspend'){
+        const suspendVendor = await pool.query(`update vendors set status = 'suspended' where id = $1 returning *`,[vId])
+        if(suspendVendor.rows.length < 1) return res.status(500).json({message: "Server error, failed to suspend vendor"})
+        return res.status(200).json({message: `${suspendVendor.rows[0].name} has been suspended`})
+    }else if(status == 'activate'){
+        const activateVendor = await pool.query(`update vendors set status = 'active' where id = $1 returning *`,[vId])
+        if(activateVendor.rows.length < 1) return res.status(500).json({message: "Server error, failed to activate vendor"})
+        return res.status(200).json({message: `${activateVendor.rows[0].name} has been activated`})
+    }else{
+        return res.status(400).json({message: "Bad request"})
+    }
+
 })
 export default router
