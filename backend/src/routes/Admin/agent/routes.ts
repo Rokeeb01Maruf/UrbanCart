@@ -76,4 +76,43 @@ router.patch("/action/:id", async (req, res)=>{
         }
     }
 })
+
+router.get("/all", async (req, res)=>{
+    const verify = await verifyadmin(req)
+    if(verify.code != 200) return res.status(verify.code).json({error: verify.error})
+    const agents = await pool.query(`select * from delivery_agents`)
+    if(agents.rows.length < 1) return res.status(200).json({message: "No delivery agents found"})
+    return res.status(200).json([{message: `${agents.rows.length} delivery agents found`},
+        agents.rows
+    ])
+})
+
+router.patch("/alter/:id", async (req, res)=>{
+    const verify = await verifyadmin(req)
+    if(verify.code != 200) return res.status(verify.code).json({error: verify.error})
+    const dId = req.params.id as string
+    const action = req.query.action as string
+    if(!dId) return res.status(400).json({message: "Bad request"})
+    const agentValidity = await pool.query(`select * from delivery_agents where id = $1`, [dId])
+    if(agentValidity.rows.length < 1) return res.status(404).json({message: "Delivery agent not found"})
+    if(!action){
+        return res.status(400).json({message: "Bad request"})
+    }else if(action === "suspend"){
+        const suspend = await pool.query(`
+            update delivery_agents set status = 'suspended' where id = $1 returning *
+            `, [dId])
+        if(suspend.rows.length < 1) return res.status(500).json({message: "Server error, failed to suspend delivery agent"})
+        return res.status(200).json([{message: `${suspend.rows[0].userid} has been suspended`},
+        suspend.rows[0]])
+    }else if(action === "activate"){
+        const activate = await pool.query(`
+            update delivery_agents set status = 'active' where id = $1 returning *
+            `, [dId])
+        if(activate.rows.length < 1) return res.status(500).json({message: "Server error, failed to activate delivery agent"})
+        return res.status(200).json([{message: `${activate.rows[0].userid} has been activated`},
+        activate.rows[0]])
+    }else{
+        return res.status(400).json({message: "Bad request"})
+    }
+})
 export default router
